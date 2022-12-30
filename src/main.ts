@@ -1,19 +1,76 @@
-import * as core from '@actions/core'
-import {wait} from './wait'
+import core from '@actions/core'
+import github from '@actions/github'
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    const pullRequest = github.context.payload.pull_request
+    const client = github.getOctokit(core.getInput('token'))
+    core.info('hello world')
+    // if (pullRequest) {
+    //   const owner = pullRequest.base.user.login
+    //   const repo = pullRequest.base.repo.name
+    //   const pullRequestNumber = pullRequest.number
+    //   const pullRequestDetails = await client.rest.pulls.get({
+    //     owner,
+    //     repo,
+    //     pull_number: pullRequestNumber
+    //   })
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    //   const titleRegex = core.getInput('title-regex')
+    //   const title = pullRequestDetails.data.title
+    //   const isPRTitleValid = validatePRField({field: title, regex: titleRegex})
 
-    core.setOutput('time', new Date().toTimeString())
+    //   const descriptionRegex = core.getInput('description-regex')
+    //   const description = pullRequestDetails.data.body ?? ''
+    //   const isPRDescriptionValid = validatePRField({
+    //     field: description,
+    //     regex: descriptionRegex
+    //   })
+
+    //   if (!isPRTitleValid || !isPRDescriptionValid) {
+    //     !isPRTitleValid &&
+    //       (await client.rest.issues.createComment({
+    //         owner,
+    //         repo,
+    //         issue_number: pullRequestNumber,
+    //         body: `The format of the PR title is invalid`
+    //       }))
+
+    //     !isPRDescriptionValid &&
+    //       (await client.rest.issues.createComment({
+    //         owner,
+    //         repo,
+    //         issue_number: pullRequestNumber,
+    //         body: `The format of the PR description is invalid`
+    //       }))
+
+    //     throw new Error('PR is invalid')
+    //   }
+
+    //   await client.rest.issues.createLabel({
+    //     owner,
+    //     repo,
+    //     name: 'Ready for Review',
+    //     description: 'The PR is ready to review',
+    //     color: '#00FF00'
+    //   })
+    // }
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
+    // core.setFailed(getErrorMessage(error))
   }
 }
+
+const validatePRField = (data: {field: string; regex: string}): boolean => {
+  const {field, regex} = data
+  const regExp = new RegExp(regex, 'gm')
+  const isFieldValid = regExp.test(field)
+
+  return isFieldValid
+}
+
+// const getErrorMessage = (error: unknown): string => {
+//   if (error instanceof Error) return error.message
+//   return String(error)
+// }
 
 run()
