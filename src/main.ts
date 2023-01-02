@@ -73,4 +73,4 @@ function getErrorMessage(error: unknown): string {
   return String(error)
 }
 
-;(async () => await run())()
+run()
