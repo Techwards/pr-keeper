@@ -3,7 +3,7 @@ import github from '@actions/github'
 
 async function run(): Promise<void> {
   try {
-    // const pullRequest = github.context.payload.pull_request
+    const pullRequest = github.context.payload.pull_request
     // const client = github.getOctokit(core.getInput('token'))
     console.log('client')
 
