@@ -11,6 +11,7 @@ type AddLabelRequest = Parameters<typeof client.rest.issues.addLabels>
 type GetLabelRequest = Parameters<typeof client.rest.issues.getLabel>
 type GetLabelResponse = ReturnType<typeof client.rest.issues.getLabel>
 
+type RemoveLabelRequest = Parameters<typeof client.rest.issues.removeLabel>
 async function run(): Promise<void> {
   if (pullRequest) {
     try {
@@ -23,7 +24,7 @@ async function run(): Promise<void> {
         pull_number: pullRequestNumber
       })
 
-      const readyToReviewLabel = await getLabel({
+      const readyForReviewLabel = await getLabel({
         owner,
         repo,
         name: 'Ready for Review'
@@ -60,10 +61,19 @@ async function run(): Promise<void> {
         //     body: `The format of the PR description is invalid`
         //   }))
 
+        if (readyForReviewLabel) {
+          await removeLabel({
+            owner,
+            repo,
+            issue_number: pullRequestNumber,
+            name: 'Ready for Review'
+          })
+        }
+
         throw new Error('PR is invalid')
       }
 
-      if (!readyToReviewLabel) {
+      if (!readyForReviewLabel) {
         await createLabel({
           owner,
           repo,
@@ -119,6 +129,13 @@ async function getLabel(
   }
 }
 
+async function removeLabel(...body: RemoveLabelRequest): Promise<void> {
+  try {
+    await client.rest.issues.removeLabel(...body)
+  } catch (error) {
+    core.info(getErrorMessage(error))
+  }
+}
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message
   return String(error)

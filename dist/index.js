@@ -51,7 +51,7 @@ function run() {
                     repo,
                     pull_number: pullRequestNumber
                 });
-                const readyToReviewLabel = yield getLabel({
+                const readyForReviewLabel = yield getLabel({
                     owner,
                     repo,
                     name: 'Ready for Review'
@@ -82,9 +82,17 @@ function run() {
                     //     issue_number: pullRequestNumber,
                     //     body: `The format of the PR description is invalid`
                     //   }))
+                    if (readyForReviewLabel) {
+                        yield removeLabel({
+                            owner,
+                            repo,
+                            issue_number: pullRequestNumber,
+                            name: 'Ready for Review'
+                        });
+                    }
                     throw new Error('PR is invalid');
                 }
-                if (!readyToReviewLabel) {
+                if (!readyForReviewLabel) {
                     yield createLabel({
                         owner,
                         repo,
@@ -140,6 +148,16 @@ function getLabel(...body) {
         catch (error) {
             core.info(getErrorMessage(error));
             return null;
+        }
+    });
+}
+function removeLabel(...body) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield client.rest.issues.removeLabel(...body);
+        }
+        catch (error) {
+            core.info(getErrorMessage(error));
         }
     });
 }
