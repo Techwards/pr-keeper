@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import github from '@actions/github'
 
-async function run(): Promise<void> {
+function run(): void {
   try {
     // const pullRequest = github.context.payload.pull_request
     // const client = github.getOctokit(core.getInput('token'))
