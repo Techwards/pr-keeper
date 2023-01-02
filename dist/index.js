@@ -25,15 +25,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const github_1 = __importDefault(__nccwpck_require__(5438));
+const github = __importStar(__nccwpck_require__(5438));
 function run() {
     try {
-        const pullRequest = github_1.default.context.payload.pull_request;
+        const pullRequest = github.context.payload.pull_request;
         // const client = github.getOctokit(core.getInput('token'))
         if (pullRequest) {
             core.info(pullRequest.number.toString());
