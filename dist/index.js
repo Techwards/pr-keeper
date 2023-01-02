@@ -12,53 +12,53 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __importDefault(__nccwpck_require__(2186));
 const github_1 = __importDefault(__nccwpck_require__(5438));
-async function run() {
-    var _a;
+function run() {
     try {
         const pullRequest = github_1.default.context.payload.pull_request;
         const client = github_1.default.getOctokit(core_1.default.getInput('token'));
         if (pullRequest) {
-            const owner = pullRequest.base.user.login;
-            const repo = pullRequest.base.repo.name;
-            const pullRequestNumber = pullRequest.number;
-            const pullRequestDetails = await client.rest.pulls.get({
-                owner,
-                repo,
-                pull_number: pullRequestNumber
-            });
-            const titleRegex = core_1.default.getInput('title-regex');
-            const title = pullRequestDetails.data.title;
-            const isPRTitleValid = validatePRField({ field: title, regex: titleRegex });
-            const descriptionRegex = core_1.default.getInput('description-regex');
-            const description = (_a = pullRequestDetails.data.body) !== null && _a !== void 0 ? _a : '';
-            const isPRDescriptionValid = validatePRField({
-                field: description,
-                regex: descriptionRegex
-            });
-            if (!isPRTitleValid || !isPRDescriptionValid) {
-                !isPRTitleValid &&
-                    (await client.rest.issues.createComment({
-                        owner,
-                        repo,
-                        issue_number: pullRequestNumber,
-                        body: `The format of the PR title is invalid`
-                    }));
-                !isPRDescriptionValid &&
-                    (await client.rest.issues.createComment({
-                        owner,
-                        repo,
-                        issue_number: pullRequestNumber,
-                        body: `The format of the PR description is invalid`
-                    }));
-                throw new Error('PR is invalid');
-            }
-            await client.rest.issues.createLabel({
-                owner,
-                repo,
-                name: 'Ready for Review',
-                description: 'The PR is ready to review',
-                color: '#00FF00'
-            });
+            core_1.default.info(pullRequest.number.toString());
+            //   const owner = pullRequest.base.user.login
+            //   const repo = pullRequest.base.repo.name
+            //   const pullRequestNumber = pullRequest.number
+            //   const pullRequestDetails = await client.rest.pulls.get({
+            //     owner,
+            //     repo,
+            //     pull_number: pullRequestNumber
+            //   })
+            //   const titleRegex = core.getInput('title-regex')
+            //   const title = pullRequestDetails.data.title
+            //   const isPRTitleValid = validatePRField({field: title, regex: titleRegex})
+            //   const descriptionRegex = core.getInput('description-regex')
+            //   const description = pullRequestDetails.data.body ?? ''
+            //   const isPRDescriptionValid = validatePRField({
+            //     field: description,
+            //     regex: descriptionRegex
+            //   })
+            //   if (!isPRTitleValid || !isPRDescriptionValid) {
+            //     !isPRTitleValid &&
+            //       (await client.rest.issues.createComment({
+            //         owner,
+            //         repo,
+            //         issue_number: pullRequestNumber,
+            //         body: `The format of the PR title is invalid`
+            //       }))
+            //     !isPRDescriptionValid &&
+            //       (await client.rest.issues.createComment({
+            //         owner,
+            //         repo,
+            //         issue_number: pullRequestNumber,
+            //         body: `The format of the PR description is invalid`
+            //       }))
+            //     throw new Error('PR is invalid')
+            //   }
+            //   await client.rest.issues.createLabel({
+            //     owner,
+            //     repo,
+            //     name: 'Ready for Review',
+            //     description: 'The PR is ready to review',
+            //     color: '#00FF00'
+            //   })
         }
     }
     catch (error) {
