@@ -37,11 +37,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
+const client = github.getOctokit(core.getInput('token'));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const pullRequest = github.context.payload.pull_request;
-            const client = github.getOctokit(core.getInput('token'));
             if (pullRequest) {
                 const owner = pullRequest.base.user.login;
                 const repo = pullRequest.base.repo.name;
@@ -79,13 +79,18 @@ function run() {
                     //   }))
                     throw new Error('PR is invalid');
                 }
-                yield client.rest.issues.createLabel({
-                    owner,
-                    repo,
-                    name: 'Ready for Review',
-                    description: 'The PR is ready to review',
-                    color: '00FF00'
-                });
+                try {
+                    yield client.rest.issues.createLabel({
+                        owner,
+                        repo,
+                        name: 'Ready for Review',
+                        description: 'The PR is ready to review',
+                        color: '00FF00'
+                    });
+                }
+                catch (error) {
+                    core.setFailed(getErrorMessage(error));
+                }
             }
         }
         catch (error) {

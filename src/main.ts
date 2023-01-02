@@ -1,10 +1,10 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+const client = github.getOctokit(core.getInput('token'))
 
 async function run(): Promise<void> {
   try {
     const pullRequest = github.context.payload.pull_request
-    const client = github.getOctokit(core.getInput('token'))
 
     if (pullRequest) {
       const owner = pullRequest.base.user.login
@@ -50,13 +50,17 @@ async function run(): Promise<void> {
         throw new Error('PR is invalid')
       }
 
-      await client.rest.issues.createLabel({
-        owner,
-        repo,
-        name: 'Ready for Review',
-        description: 'The PR is ready to review',
-        color: '00FF00'
-      })
+      try {
+        await client.rest.issues.createLabel({
+          owner,
+          repo,
+          name: 'Ready for Review',
+          description: 'The PR is ready to review',
+          color: '00FF00'
+        })
+      } catch (error) {
+        core.setFailed(getErrorMessage(error))
+      }
     }
   } catch (error) {
     core.setFailed(getErrorMessage(error))
