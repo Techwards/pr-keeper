@@ -25,63 +25,72 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 function run() {
-    try {
-        const pullRequest = github.context.payload.pull_request;
-        // const client = github.getOctokit(core.getInput('token'))
-        if (pullRequest) {
-            core.info(pullRequest.number.toString());
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const pullRequest = github.context.payload.pull_request;
+            const client = github.getOctokit(core.getInput('token'));
+            if (pullRequest) {
+                const owner = pullRequest.base.user.login;
+                const repo = pullRequest.base.repo.name;
+                const pullRequestNumber = pullRequest.number;
+                const pullRequestDetails = yield client.rest.pulls.get({
+                    owner,
+                    repo,
+                    pull_number: pullRequestNumber
+                });
+                const titleRegex = core.getInput('title-regex');
+                const title = pullRequestDetails.data.title;
+                const isPRTitleValid = validatePRField({ field: title, regex: titleRegex });
+                const descriptionRegex = core.getInput('description-regex');
+                const description = (_a = pullRequestDetails.data.body) !== null && _a !== void 0 ? _a : '';
+                const isPRDescriptionValid = validatePRField({
+                    field: description,
+                    regex: descriptionRegex
+                });
+                if (!isPRTitleValid || !isPRDescriptionValid) {
+                    !isPRTitleValid &&
+                        (yield client.rest.issues.createComment({
+                            owner,
+                            repo,
+                            issue_number: pullRequestNumber,
+                            body: `The format of the PR title is invalid`
+                        }));
+                    !isPRDescriptionValid &&
+                        (yield client.rest.issues.createComment({
+                            owner,
+                            repo,
+                            issue_number: pullRequestNumber,
+                            body: `The format of the PR description is invalid`
+                        }));
+                    throw new Error('PR is invalid');
+                }
+                yield client.rest.issues.createLabel({
+                    owner,
+                    repo,
+                    name: 'Ready for Review',
+                    description: 'The PR is ready to review',
+                    color: '#00FF00'
+                });
+            }
         }
-        // if (pullRequest) {
-        //   const owner = pullRequest.base.user.login
-        //   const repo = pullRequest.base.repo.name
-        //   const pullRequestNumber = pullRequest.number
-        //   const pullRequestDetails = await client.rest.pulls.get({
-        //     owner,
-        //     repo,
-        //     pull_number: pullRequestNumber
-        //   })
-        //   const titleRegex = core.getInput('title-regex')
-        //   const title = pullRequestDetails.data.title
-        //   const isPRTitleValid = validatePRField({field: title, regex: titleRegex})
-        //   const descriptionRegex = core.getInput('description-regex')
-        //   const description = pullRequestDetails.data.body ?? ''
-        //   const isPRDescriptionValid = validatePRField({
-        //     field: description,
-        //     regex: descriptionRegex
-        //   })
-        //   if (!isPRTitleValid || !isPRDescriptionValid) {
-        //     !isPRTitleValid &&
-        //       (await client.rest.issues.createComment({
-        //         owner,
-        //         repo,
-        //         issue_number: pullRequestNumber,
-        //         body: `The format of the PR title is invalid`
-        //       }))
-        //     !isPRDescriptionValid &&
-        //       (await client.rest.issues.createComment({
-        //         owner,
-        //         repo,
-        //         issue_number: pullRequestNumber,
-        //         body: `The format of the PR description is invalid`
-        //       }))
-        //     throw new Error('PR is invalid')
-        //   }
-        //   await client.rest.issues.createLabel({
-        //     owner,
-        //     repo,
-        //     name: 'Ready for Review',
-        //     description: 'The PR is ready to review',
-        //     color: '#00FF00'
-        //   })
-        // }
-    }
-    catch (error) {
-        core.setFailed(getErrorMessage(error));
-    }
+        catch (error) {
+            core.setFailed(getErrorMessage(error));
+        }
+    });
 }
 function validatePRField(data) {
     const { field, regex } = data;
