@@ -51,6 +51,11 @@ function run() {
                     repo,
                     pull_number: pullRequestNumber
                 });
+                const readyToReviewLabel = yield getLabel({
+                    owner,
+                    repo,
+                    name: 'Ready for Review'
+                });
                 const titleRegex = core.getInput('title-regex');
                 const title = pullRequestDetails.data.title;
                 const isPRTitleValid = validatePRField({ field: title, regex: titleRegex });
@@ -79,14 +84,16 @@ function run() {
                     //   }))
                     throw new Error('PR is invalid');
                 }
-                yield createLabel({
-                    owner,
-                    repo,
-                    name: 'Ready for Review',
-                    description: 'The PR is ready to review',
-                    color: '00FF00'
-                });
-                yield client.rest.issues.addLabels({
+                if (!readyToReviewLabel) {
+                    yield createLabel({
+                        owner,
+                        repo,
+                        name: 'Ready for Review',
+                        description: 'The PR is ready to review',
+                        color: '00FF00'
+                    });
+                }
+                yield addLabels({
                     repo,
                     owner,
                     issue_number: pullRequestNumber,
@@ -99,6 +106,12 @@ function run() {
         }
     });
 }
+function validatePRField(data) {
+    const { field, regex } = data;
+    const regExp = new RegExp(regex, 'gm');
+    const isFieldValid = regExp.test(field);
+    return isFieldValid;
+}
 function createLabel(...body) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -109,11 +122,26 @@ function createLabel(...body) {
         }
     });
 }
-function validatePRField(data) {
-    const { field, regex } = data;
-    const regExp = new RegExp(regex, 'gm');
-    const isFieldValid = regExp.test(field);
-    return isFieldValid;
+function addLabels(...body) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield client.rest.issues.addLabels(...body);
+        }
+        catch (error) {
+            core.info(getErrorMessage(error));
+        }
+    });
+}
+function getLabel(...body) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            return yield client.rest.issues.getLabel(...body);
+        }
+        catch (error) {
+            core.info(getErrorMessage(error));
+            return null;
+        }
+    });
 }
 function getErrorMessage(error) {
     if (error instanceof Error)

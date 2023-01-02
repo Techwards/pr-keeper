@@ -6,6 +6,11 @@ const pullRequest = github.context.payload.pull_request
 
 type CreateLabelRequest = Parameters<typeof client.rest.issues.createLabel>
 
+type AddLabelRequest = Parameters<typeof client.rest.issues.addLabels>
+
+type GetLabelRequest = Parameters<typeof client.rest.issues.getLabel>
+type GetLabelResponse = ReturnType<typeof client.rest.issues.getLabel>
+
 async function run(): Promise<void> {
   if (pullRequest) {
     try {
@@ -16,6 +21,12 @@ async function run(): Promise<void> {
         owner,
         repo,
         pull_number: pullRequestNumber
+      })
+
+      const readyToReviewLabel = await getLabel({
+        owner,
+        repo,
+        name: 'Ready for Review'
       })
 
       const titleRegex = core.getInput('title-regex')
@@ -52,15 +63,17 @@ async function run(): Promise<void> {
         throw new Error('PR is invalid')
       }
 
-      await createLabel({
-        owner,
-        repo,
-        name: 'Ready for Review',
-        description: 'The PR is ready to review',
-        color: '00FF00'
-      })
+      if (!readyToReviewLabel) {
+        await createLabel({
+          owner,
+          repo,
+          name: 'Ready for Review',
+          description: 'The PR is ready to review',
+          color: '00FF00'
+        })
+      }
 
-      await client.rest.issues.addLabels({
+      await addLabels({
         repo,
         owner,
         issue_number: pullRequestNumber,
@@ -72,6 +85,14 @@ async function run(): Promise<void> {
   }
 }
 
+function validatePRField(data: {field: string; regex: string}): boolean {
+  const {field, regex} = data
+  const regExp = new RegExp(regex, 'gm')
+  const isFieldValid = regExp.test(field)
+
+  return isFieldValid
+}
+
 async function createLabel(...body: CreateLabelRequest): Promise<void> {
   try {
     await client.rest.issues.createLabel(...body)
@@ -79,13 +100,23 @@ async function createLabel(...body: CreateLabelRequest): Promise<void> {
     core.info(getErrorMessage(error))
   }
 }
+async function addLabels(...body: AddLabelRequest): Promise<void> {
+  try {
+    await client.rest.issues.addLabels(...body)
+  } catch (error) {
+    core.info(getErrorMessage(error))
+  }
+}
 
-function validatePRField(data: {field: string; regex: string}): boolean {
-  const {field, regex} = data
-  const regExp = new RegExp(regex, 'gm')
-  const isFieldValid = regExp.test(field)
-
-  return isFieldValid
+async function getLabel(
+  ...body: GetLabelRequest
+): Promise<GetLabelResponse | null> {
+  try {
+    return await client.rest.issues.getLabel(...body)
+  } catch (error) {
+    core.info(getErrorMessage(error))
+    return null
+  }
 }
 
 function getErrorMessage(error: unknown): string {
