@@ -3,9 +3,11 @@ import github from '@actions/github'
 
 function run(): void {
   try {
-    // const pullRequest = github.context.payload.pull_request
+    const pullRequest = github.context.payload.pull_request
     // const client = github.getOctokit(core.getInput('token'))
-    core.info('client')
+    if (pullRequest) {
+      core.info(pullRequest.number.toString())
+    }
 
     // if (pullRequest) {
     //   const owner = pullRequest.base.user.login
