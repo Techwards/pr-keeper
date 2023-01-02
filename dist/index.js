@@ -79,13 +79,13 @@ function run() {
                     //   }))
                     throw new Error('PR is invalid');
                 }
-                // await client.rest.issues.createLabel({
-                //   owner,
-                //   repo,
-                //   name: 'Ready for Review',
-                //   description: 'The PR is ready to review',
-                //   color: '#00FF00'
-                // })
+                yield client.rest.issues.createLabel({
+                    owner,
+                    repo,
+                    name: 'Ready for Review',
+                    description: 'The PR is ready to review',
+                    color: '#00FF00'
+                });
             }
         }
         catch (error) {
