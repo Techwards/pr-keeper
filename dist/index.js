@@ -38,11 +38,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const client = github.getOctokit(core.getInput('token'));
+const pullRequest = github.context.payload.pull_request;
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const pullRequest = github.context.payload.pull_request;
-            if (pullRequest) {
+        if (pullRequest) {
+            try {
                 const owner = pullRequest.base.user.login;
                 const repo = pullRequest.base.repo.name;
                 const pullRequestNumber = pullRequest.number;
@@ -79,22 +79,33 @@ function run() {
                     //   }))
                     throw new Error('PR is invalid');
                 }
-                try {
-                    yield client.rest.issues.createLabel({
-                        owner,
-                        repo,
-                        name: 'Ready for Review',
-                        description: 'The PR is ready to review',
-                        color: '00FF00'
-                    });
-                }
-                catch (error) {
-                    core.info(getErrorMessage(error));
-                }
+                yield createLabel({
+                    owner,
+                    repo,
+                    name: 'Ready for Review',
+                    description: 'The PR is ready to review',
+                    color: '00FF00'
+                });
+                yield client.rest.issues.addLabels({
+                    repo,
+                    owner,
+                    issue_number: pullRequestNumber,
+                    labels: ['Ready for Review']
+                });
+            }
+            catch (error) {
+                core.setFailed(getErrorMessage(error));
             }
         }
+    });
+}
+function createLabel(...body) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield client.rest.issues.createLabel(...body);
+        }
         catch (error) {
-            core.setFailed(getErrorMessage(error));
+            core.info(getErrorMessage(error));
         }
     });
 }

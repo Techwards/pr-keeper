@@ -1,12 +1,14 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+
 const client = github.getOctokit(core.getInput('token'))
+const pullRequest = github.context.payload.pull_request
+
+type CreateLabelRequest = Parameters<typeof client.rest.issues.createLabel>
 
 async function run(): Promise<void> {
-  try {
-    const pullRequest = github.context.payload.pull_request
-
-    if (pullRequest) {
+  if (pullRequest) {
+    try {
       const owner = pullRequest.base.user.login
       const repo = pullRequest.base.repo.name
       const pullRequestNumber = pullRequest.number
@@ -50,20 +52,31 @@ async function run(): Promise<void> {
         throw new Error('PR is invalid')
       }
 
-      try {
-        await client.rest.issues.createLabel({
-          owner,
-          repo,
-          name: 'Ready for Review',
-          description: 'The PR is ready to review',
-          color: '00FF00'
-        })
-      } catch (error) {
-        core.info(getErrorMessage(error))
-      }
+      await createLabel({
+        owner,
+        repo,
+        name: 'Ready for Review',
+        description: 'The PR is ready to review',
+        color: '00FF00'
+      })
+
+      await client.rest.issues.addLabels({
+        repo,
+        owner,
+        issue_number: pullRequestNumber,
+        labels: ['Ready for Review']
+      })
+    } catch (error) {
+      core.setFailed(getErrorMessage(error))
     }
+  }
+}
+
+async function createLabel(...body: CreateLabelRequest): Promise<void> {
+  try {
+    await client.rest.issues.createLabel(...body)
   } catch (error) {
-    core.setFailed(getErrorMessage(error))
+    core.info(getErrorMessage(error))
   }
 }
 
