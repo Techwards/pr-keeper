@@ -6,130 +6,69 @@ require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-var core_1 = __importDefault(__nccwpck_require__(2186));
-var github_1 = __importDefault(__nccwpck_require__(5438));
-function run() {
+const core_1 = __importDefault(__nccwpck_require__(2186));
+const github_1 = __importDefault(__nccwpck_require__(5438));
+async function run() {
     var _a;
-    return __awaiter(this, void 0, void 0, function () {
-        var pullRequest, client, owner, repo, pullRequestNumber, pullRequestDetails, titleRegex, title, isPRTitleValid, descriptionRegex, description, isPRDescriptionValid, _b, _c, error_1;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
-                case 0:
-                    _d.trys.push([0, 9, , 10]);
-                    pullRequest = github_1.default.context.payload.pull_request;
-                    client = github_1.default.getOctokit(core_1.default.getInput('token'));
-                    if (!pullRequest) return [3 /*break*/, 8];
-                    owner = pullRequest.base.user.login;
-                    repo = pullRequest.base.repo.name;
-                    pullRequestNumber = pullRequest.number;
-                    return [4 /*yield*/, client.rest.pulls.get({
-                            owner: owner,
-                            repo: repo,
-                            pull_number: pullRequestNumber
-                        })];
-                case 1:
-                    pullRequestDetails = _d.sent();
-                    titleRegex = core_1.default.getInput('title-regex');
-                    title = pullRequestDetails.data.title;
-                    isPRTitleValid = validatePRField({ field: title, regex: titleRegex });
-                    descriptionRegex = core_1.default.getInput('description-regex');
-                    description = (_a = pullRequestDetails.data.body) !== null && _a !== void 0 ? _a : '';
-                    isPRDescriptionValid = validatePRField({
-                        field: description,
-                        regex: descriptionRegex
-                    });
-                    if (!(!isPRTitleValid || !isPRDescriptionValid)) return [3 /*break*/, 6];
-                    _b = !isPRTitleValid;
-                    if (!_b) return [3 /*break*/, 3];
-                    return [4 /*yield*/, client.rest.issues.createComment({
-                            owner: owner,
-                            repo: repo,
-                            issue_number: pullRequestNumber,
-                            body: "The format of the PR title is invalid"
-                        })];
-                case 2:
-                    _b = (_d.sent());
-                    _d.label = 3;
-                case 3:
-                    _b;
-                    _c = !isPRDescriptionValid;
-                    if (!_c) return [3 /*break*/, 5];
-                    return [4 /*yield*/, client.rest.issues.createComment({
-                            owner: owner,
-                            repo: repo,
-                            issue_number: pullRequestNumber,
-                            body: "The format of the PR description is invalid"
-                        })];
-                case 4:
-                    _c = (_d.sent());
-                    _d.label = 5;
-                case 5:
-                    _c;
-                    throw new Error('PR is invalid');
-                case 6: return [4 /*yield*/, client.rest.issues.createLabel({
-                        owner: owner,
-                        repo: repo,
-                        name: 'Ready for Review',
-                        description: 'The PR is ready to review',
-                        color: '#00FF00'
-                    })];
-                case 7:
-                    _d.sent();
-                    _d.label = 8;
-                case 8: return [3 /*break*/, 10];
-                case 9:
-                    error_1 = _d.sent();
-                    core_1.default.setFailed(getErrorMessage(error_1));
-                    return [3 /*break*/, 10];
-                case 10: return [2 /*return*/];
+    try {
+        const pullRequest = github_1.default.context.payload.pull_request;
+        const client = github_1.default.getOctokit(core_1.default.getInput('token'));
+        if (pullRequest) {
+            const owner = pullRequest.base.user.login;
+            const repo = pullRequest.base.repo.name;
+            const pullRequestNumber = pullRequest.number;
+            const pullRequestDetails = await client.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: pullRequestNumber
+            });
+            const titleRegex = core_1.default.getInput('title-regex');
+            const title = pullRequestDetails.data.title;
+            const isPRTitleValid = validatePRField({ field: title, regex: titleRegex });
+            const descriptionRegex = core_1.default.getInput('description-regex');
+            const description = (_a = pullRequestDetails.data.body) !== null && _a !== void 0 ? _a : '';
+            const isPRDescriptionValid = validatePRField({
+                field: description,
+                regex: descriptionRegex
+            });
+            if (!isPRTitleValid || !isPRDescriptionValid) {
+                !isPRTitleValid &&
+                    (await client.rest.issues.createComment({
+                        owner,
+                        repo,
+                        issue_number: pullRequestNumber,
+                        body: `The format of the PR title is invalid`
+                    }));
+                !isPRDescriptionValid &&
+                    (await client.rest.issues.createComment({
+                        owner,
+                        repo,
+                        issue_number: pullRequestNumber,
+                        body: `The format of the PR description is invalid`
+                    }));
+                throw new Error('PR is invalid');
             }
-        });
-    });
+            await client.rest.issues.createLabel({
+                owner,
+                repo,
+                name: 'Ready for Review',
+                description: 'The PR is ready to review',
+                color: '#00FF00'
+            });
+        }
+    }
+    catch (error) {
+        core_1.default.setFailed(getErrorMessage(error));
+    }
 }
 function validatePRField(data) {
-    var field = data.field, regex = data.regex;
-    var regExp = new RegExp(regex, 'gm');
-    var isFieldValid = regExp.test(field);
+    const { field, regex } = data;
+    const regExp = new RegExp(regex, 'gm');
+    const isFieldValid = regExp.test(field);
     return isFieldValid;
 }
 function getErrorMessage(error) {
