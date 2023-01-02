@@ -50,13 +50,13 @@ async function run(): Promise<void> {
         throw new Error('PR is invalid')
       }
 
-      await client.rest.issues.createLabel({
-        owner,
-        repo,
-        name: 'Ready for Review',
-        description: 'The PR is ready to review',
-        color: '#00FF00'
-      })
+      // await client.rest.issues.createLabel({
+      //   owner,
+      //   repo,
+      //   name: 'Ready for Review',
+      //   description: 'The PR is ready to review',
+      //   color: '#00FF00'
+      // })
     }
   } catch (error) {
     core.setFailed(getErrorMessage(error))
