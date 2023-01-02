@@ -89,7 +89,7 @@ function run() {
                     });
                 }
                 catch (error) {
-                    core.setFailed(getErrorMessage(error));
+                    core.info(getErrorMessage(error));
                 }
             }
         }

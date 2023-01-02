@@ -59,7 +59,7 @@ async function run(): Promise<void> {
           color: '00FF00'
         })
       } catch (error) {
-        core.setFailed(getErrorMessage(error))
+        core.info(getErrorMessage(error))
       }
     }
   } catch (error) {
