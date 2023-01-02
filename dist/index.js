@@ -84,7 +84,7 @@ function run() {
                     repo,
                     name: 'Ready for Review',
                     description: 'The PR is ready to review',
-                    color: '#00FF00'
+                    color: '00FF00'
                 });
             }
         }
