@@ -32,7 +32,7 @@ function run() {
         // const pullRequest = github.context.payload.pull_request
         // const client = github.getOctokit(core.getInput('token'))
         core.info('client');
-        // throw new Error('error')
+        throw new Error('error');
         // if (pullRequest) {
         //   const owner = pullRequest.base.user.login
         //   const repo = pullRequest.base.repo.name
