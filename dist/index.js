@@ -37,7 +37,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
-const client = github.getOctokit(core.getInput('token'));
+const token = core.getInput('token');
+const validationLabel = core.getInput('validation-label');
+const titleRegex = core.getInput('title-regex');
+const client = github.getOctokit(token);
 const pullRequest = github.context.payload.pull_request;
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -54,9 +57,8 @@ function run() {
                 const readyForReviewLabel = yield getLabel({
                     owner,
                     repo,
-                    name: 'Ready for Review'
+                    name: validationLabel
                 });
-                const titleRegex = core.getInput('title-regex');
                 const title = pullRequestDetails.data.title;
                 const isPRTitleValid = validatePRField({ field: title, regex: titleRegex });
                 // const descriptionRegex = core.getInput('description-regex')
@@ -87,7 +89,7 @@ function run() {
                             owner,
                             repo,
                             issue_number: pullRequestNumber,
-                            name: 'Ready for Review'
+                            name: validationLabel
                         });
                     }
                     throw new Error('PR is invalid');
@@ -96,7 +98,7 @@ function run() {
                     yield createLabel({
                         owner,
                         repo,
-                        name: 'Ready for Review',
+                        name: validationLabel,
                         description: 'The PR is ready to review',
                         color: '00FF00'
                     });
@@ -105,7 +107,7 @@ function run() {
                     repo,
                     owner,
                     issue_number: pullRequestNumber,
-                    labels: ['Ready for Review']
+                    labels: [validationLabel]
                 });
             }
             catch (error) {

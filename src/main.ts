@@ -1,7 +1,11 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 
-const client = github.getOctokit(core.getInput('token'))
+const token = core.getInput('token')
+const validationLabel = core.getInput('validation-label')
+const titleRegex = core.getInput('title-regex')
+
+const client = github.getOctokit(token)
 const pullRequest = github.context.payload.pull_request
 
 type CreateLabelRequest = Parameters<typeof client.rest.issues.createLabel>
@@ -27,10 +31,9 @@ async function run(): Promise<void> {
       const readyForReviewLabel = await getLabel({
         owner,
         repo,
-        name: 'Ready for Review'
+        name: validationLabel
       })
 
-      const titleRegex = core.getInput('title-regex')
       const title = pullRequestDetails.data.title
       const isPRTitleValid = validatePRField({field: title, regex: titleRegex})
 
@@ -66,7 +69,7 @@ async function run(): Promise<void> {
             owner,
             repo,
             issue_number: pullRequestNumber,
-            name: 'Ready for Review'
+            name: validationLabel
           })
         }
 
@@ -77,7 +80,7 @@ async function run(): Promise<void> {
         await createLabel({
           owner,
           repo,
-          name: 'Ready for Review',
+          name: validationLabel,
           description: 'The PR is ready to review',
           color: '00FF00'
         })
@@ -87,7 +90,7 @@ async function run(): Promise<void> {
         repo,
         owner,
         issue_number: pullRequestNumber,
-        labels: ['Ready for Review']
+        labels: [validationLabel]
       })
     } catch (error) {
       core.setFailed(getErrorMessage(error))
