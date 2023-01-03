@@ -8,11 +8,11 @@ inputs:
   title-regex:
     description: 'Regex for pull request title validation'
     default: >
-      ^(FEATURE|FIX|TASK)\s\|\sISSUE\s\#[1-9]{1,}\s\|\s[\w\s\']*$
+      ^(Feature|Fix|Task)\s\|\sIssue\s\#[1-9]{1,}\s\|\s[\w\s\']*$
   description-regex:
     description: 'Regex for pull request description validation'
     default: >
-      This\sPR\scloses\s\[\#[0-9]{1,}\]\(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~\#\?\&\/\=]*)\)
+      This\sPR\scloses\s\[\#[0-9]{1,}\]\((https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~\#\?\&\/\=]*)\)
   validation-label:
     description: 'Label to add when the pull request format is valid'
     default: Ready for Review
