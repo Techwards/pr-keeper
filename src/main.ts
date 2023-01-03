@@ -38,17 +38,13 @@ async function run(): Promise<void> {
       const title = pullRequestDetails.data.title
       const isPRTitleValid = validatePRField({field: title, regex: titleRegex})
 
-      core.info(pullRequestDetails.data.body ?? '')
-      // const description = pullRequestDetails.data.body ?? ''
-      // const isPRDescriptionValid = validatePRField({
-      //   field: description,
-      //   regex: descriptionRegex
-      // })
+      const description = pullRequestDetails.data.body ?? ''
+      const isPRDescriptionValid = validatePRField({
+        field: description,
+        regex: descriptionRegex
+      })
 
-      if (
-        !isPRTitleValid
-        // || !isPRDescriptionValid
-      ) {
+      if (!isPRTitleValid || !isPRDescriptionValid) {
         !isPRTitleValid &&
           (await client.rest.issues.createComment({
             owner,
@@ -57,13 +53,13 @@ async function run(): Promise<void> {
             body: `The format of the PR title is invalid`
           }))
 
-        // !isPRDescriptionValid &&
-        //   (await client.rest.issues.createComment({
-        //     owner,
-        //     repo,
-        //     issue_number: pullRequestNumber,
-        //     body: `The format of the PR description is invalid`
-        //   }))
+        !isPRDescriptionValid &&
+          (await client.rest.issues.createComment({
+            owner,
+            repo,
+            issue_number: pullRequestNumber,
+            body: `The format of the PR description is invalid`
+          }))
 
         if (readyForReviewLabel) {
           await removeLabel({

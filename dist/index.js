@@ -63,15 +63,12 @@ function run() {
                 });
                 const title = pullRequestDetails.data.title;
                 const isPRTitleValid = validatePRField({ field: title, regex: titleRegex });
-                core.info((_a = pullRequestDetails.data.body) !== null && _a !== void 0 ? _a : '');
-                // const description = pullRequestDetails.data.body ?? ''
-                // const isPRDescriptionValid = validatePRField({
-                //   field: description,
-                //   regex: descriptionRegex
-                // })
-                if (!isPRTitleValid
-                // || !isPRDescriptionValid
-                ) {
+                const description = (_a = pullRequestDetails.data.body) !== null && _a !== void 0 ? _a : '';
+                const isPRDescriptionValid = validatePRField({
+                    field: description,
+                    regex: descriptionRegex
+                });
+                if (!isPRTitleValid || !isPRDescriptionValid) {
                     !isPRTitleValid &&
                         (yield client.rest.issues.createComment({
                             owner,
@@ -79,13 +76,13 @@ function run() {
                             issue_number: pullRequestNumber,
                             body: `The format of the PR title is invalid`
                         }));
-                    // !isPRDescriptionValid &&
-                    //   (await client.rest.issues.createComment({
-                    //     owner,
-                    //     repo,
-                    //     issue_number: pullRequestNumber,
-                    //     body: `The format of the PR description is invalid`
-                    //   }))
+                    !isPRDescriptionValid &&
+                        (yield client.rest.issues.createComment({
+                            owner,
+                            repo,
+                            issue_number: pullRequestNumber,
+                            body: `The format of the PR description is invalid`
+                        }));
                     if (readyForReviewLabel) {
                         yield removeLabel({
                             owner,
