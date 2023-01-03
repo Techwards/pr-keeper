@@ -40,9 +40,11 @@ const github = __importStar(__nccwpck_require__(5438));
 const token = core.getInput('token');
 const validationLabel = core.getInput('validation-label');
 const titleRegex = core.getInput('title-regex');
+const descriptionRegex = core.getInput('description-regex');
 const client = github.getOctokit(token);
 const pullRequest = github.context.payload.pull_request;
 function run() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (pullRequest) {
             try {
@@ -61,7 +63,7 @@ function run() {
                 });
                 const title = pullRequestDetails.data.title;
                 const isPRTitleValid = validatePRField({ field: title, regex: titleRegex });
-                // const descriptionRegex = core.getInput('description-regex')
+                core.info((_a = pullRequestDetails.data.body) !== null && _a !== void 0 ? _a : '');
                 // const description = pullRequestDetails.data.body ?? ''
                 // const isPRDescriptionValid = validatePRField({
                 //   field: description,

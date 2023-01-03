@@ -4,6 +4,7 @@ import * as github from '@actions/github'
 const token = core.getInput('token')
 const validationLabel = core.getInput('validation-label')
 const titleRegex = core.getInput('title-regex')
+const descriptionRegex = core.getInput('description-regex')
 
 const client = github.getOctokit(token)
 const pullRequest = github.context.payload.pull_request
@@ -37,7 +38,7 @@ async function run(): Promise<void> {
       const title = pullRequestDetails.data.title
       const isPRTitleValid = validatePRField({field: title, regex: titleRegex})
 
-      // const descriptionRegex = core.getInput('description-regex')
+      core.info(pullRequestDetails.data.body ?? '')
       // const description = pullRequestDetails.data.body ?? ''
       // const isPRDescriptionValid = validatePRField({
       //   field: description,
@@ -102,7 +103,6 @@ function validatePRField(data: {field: string; regex: string}): boolean {
   const {field, regex} = data
   const regExp = new RegExp(regex, 'gm')
   const isFieldValid = regExp.test(field)
-
   return isFieldValid
 }
 
