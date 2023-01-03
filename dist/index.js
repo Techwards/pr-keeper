@@ -68,6 +68,7 @@ function run() {
                     field: description,
                     regex: descriptionRegex
                 });
+                core.info(`${isPRDescriptionValid}`);
                 !isPRTitleValid &&
                     (yield client.rest.issues.createComment({
                         owner,
