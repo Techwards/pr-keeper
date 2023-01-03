@@ -45,8 +45,6 @@ async function run(): Promise<void> {
         regex: descriptionRegex
       })
 
-      core.info(`${isPRDescriptionValid}`)
-
       !isPRTitleValid &&
         (await client.rest.issues.createComment({
           owner,
