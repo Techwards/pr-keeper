@@ -42,12 +42,12 @@ const validationLabel = core.getInput('validation-label');
 const titleRegex = core.getInput('title-regex');
 const descriptionRegex = core.getInput('description-regex');
 const client = github.getOctokit(token);
-const pullRequest = github.context.payload.pull_request;
 function run() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        if (pullRequest) {
-            try {
+        try {
+            const pullRequest = github.context.payload.pull_request;
+            if (pullRequest) {
                 const owner = pullRequest.base.user.login;
                 const repo = pullRequest.base.repo.name;
                 const pullRequestNumber = pullRequest.number;
@@ -68,40 +68,38 @@ function run() {
                     field: description,
                     regex: descriptionRegex
                 });
+                !isPRTitleValid &&
+                    (yield client.rest.issues.createComment({
+                        owner,
+                        repo,
+                        issue_number: pullRequestNumber,
+                        body: "This pull request doesn't meet the title convention"
+                    }));
+                !isPRDescriptionValid &&
+                    (yield client.rest.issues.createComment({
+                        owner,
+                        repo,
+                        issue_number: pullRequestNumber,
+                        body: "This pull request doesn't meet the description convention"
+                    }));
                 if (!isPRTitleValid || !isPRDescriptionValid) {
-                    !isPRTitleValid &&
-                        (yield client.rest.issues.createComment({
-                            owner,
-                            repo,
-                            issue_number: pullRequestNumber,
-                            body: `The format of the PR title is invalid`
-                        }));
-                    !isPRDescriptionValid &&
-                        (yield client.rest.issues.createComment({
-                            owner,
-                            repo,
-                            issue_number: pullRequestNumber,
-                            body: `The format of the PR description is invalid`
-                        }));
-                    if (readyForReviewLabel) {
-                        yield removeLabel({
+                    readyForReviewLabel &&
+                        (yield removeLabel({
                             owner,
                             repo,
                             issue_number: pullRequestNumber,
                             name: validationLabel
-                        });
-                    }
-                    throw new Error('PR is invalid');
+                        }));
+                    throw new Error('This pull request is invalid');
                 }
-                if (!readyForReviewLabel) {
-                    yield createLabel({
+                !readyForReviewLabel &&
+                    (yield createLabel({
                         owner,
                         repo,
                         name: validationLabel,
-                        description: 'The PR is ready to review',
+                        description: 'The pull request is ready to review',
                         color: '00FF00'
-                    });
-                }
+                    }));
                 yield addLabels({
                     repo,
                     owner,
@@ -109,9 +107,9 @@ function run() {
                     labels: [validationLabel]
                 });
             }
-            catch (error) {
-                core.setFailed(getErrorMessage(error));
-            }
+        }
+        catch (error) {
+            core.setFailed(getErrorMessage(error));
         }
     });
 }

@@ -7,7 +7,6 @@ const titleRegex = core.getInput('title-regex')
 const descriptionRegex = core.getInput('description-regex')
 
 const client = github.getOctokit(token)
-const pullRequest = github.context.payload.pull_request
 
 type CreateLabelRequest = Parameters<typeof client.rest.issues.createLabel>
 
@@ -18,11 +17,13 @@ type GetLabelResponse = ReturnType<typeof client.rest.issues.getLabel>
 
 type RemoveLabelRequest = Parameters<typeof client.rest.issues.removeLabel>
 async function run(): Promise<void> {
-  if (pullRequest) {
-    try {
+  try {
+    const pullRequest = github.context.payload.pull_request
+    if (pullRequest) {
       const owner = pullRequest.base.user.login
       const repo = pullRequest.base.repo.name
       const pullRequestNumber = pullRequest.number
+
       const pullRequestDetails = await client.rest.pulls.get({
         owner,
         repo,
@@ -44,44 +45,42 @@ async function run(): Promise<void> {
         regex: descriptionRegex
       })
 
+      !isPRTitleValid &&
+        (await client.rest.issues.createComment({
+          owner,
+          repo,
+          issue_number: pullRequestNumber,
+          body: "This pull request doesn't meet the title convention"
+        }))
+
+      !isPRDescriptionValid &&
+        (await client.rest.issues.createComment({
+          owner,
+          repo,
+          issue_number: pullRequestNumber,
+          body: "This pull request doesn't meet the description convention"
+        }))
+
       if (!isPRTitleValid || !isPRDescriptionValid) {
-        !isPRTitleValid &&
-          (await client.rest.issues.createComment({
-            owner,
-            repo,
-            issue_number: pullRequestNumber,
-            body: `The format of the PR title is invalid`
-          }))
-
-        !isPRDescriptionValid &&
-          (await client.rest.issues.createComment({
-            owner,
-            repo,
-            issue_number: pullRequestNumber,
-            body: `The format of the PR description is invalid`
-          }))
-
-        if (readyForReviewLabel) {
-          await removeLabel({
+        readyForReviewLabel &&
+          (await removeLabel({
             owner,
             repo,
             issue_number: pullRequestNumber,
             name: validationLabel
-          })
-        }
+          }))
 
-        throw new Error('PR is invalid')
+        throw new Error('This pull request is invalid')
       }
 
-      if (!readyForReviewLabel) {
-        await createLabel({
+      !readyForReviewLabel &&
+        (await createLabel({
           owner,
           repo,
           name: validationLabel,
-          description: 'The PR is ready to review',
+          description: 'The pull request is ready to review',
           color: '00FF00'
-        })
-      }
+        }))
 
       await addLabels({
         repo,
@@ -89,9 +88,9 @@ async function run(): Promise<void> {
         issue_number: pullRequestNumber,
         labels: [validationLabel]
       })
-    } catch (error) {
-      core.setFailed(getErrorMessage(error))
     }
+  } catch (error) {
+    core.setFailed(getErrorMessage(error))
   }
 }
 
