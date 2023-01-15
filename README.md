@@ -145,7 +145,7 @@ jobs:
           title-regex: >
             ^Ticket\s\#[1-9]{1,}$
           description-regex: >
-            This\sPull Request\s[closes|fixes]\s\[\#[0-9]{1,}\]
+            This\sPull Request\s(closes|fixes)\s\[\#[0-9]{1,}\]
           validation-label: Valid Pull Request Convention
 ```
 
