@@ -153,16 +153,12 @@ jobs:
 
 ## Inputs table
 
-<!-- | Name                | Required | Default                                                                                                                                                 | Description                                                                                                  |
-| ------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `token`             | `true`   | `none`                                                                                                                                                  | A GitHub authentication token                                                                                |
-| `title-regex`       | `false`  | ```^(Feature                                                                                                                                            | Fix                                                                                                          | Task)\s\|\sIssue\s\#[1-9]{1,}\s\|\s[\w\s\']\*$``` | A regular expression to validate the PR's title convention. Can also provide custom regular expression |
-| `description-regex` | `false`  | `This\sPR\scloses\s\[\#[0-9]{1,}\]\((https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~\#\?\&\/\=]*)\)` | A regular expression to validate the PR's description convention. Can also provide custom regular expression |
-| `validation-label`  | `false`  | Ready for Review                                                                                                                                        | A label will be attached on the PR if the PR is valid. Can also provide custom label name                    | -->
-| First Header  | Second Header |
-| ------------- | ------------- |
-| Content Cell  | Content Cell  |
-| Content Cell  | Content Cell  |
+| Name | Required | Default | Description |
+| ---- | -------- | ------- | ----------- |
+| `token` | `true` | `none` | A GitHub authentication token |
+| `title-regex` | `false` | `^(Feature|Fix|Task)\s\|\sIssue\s\#[1-9]{1,}\s\|\s[\w\s\']\*$` | A regular expression to validate the PR's title convention. Can also provide custom regular expression |
+| `description-regex` | `false` | `This\sPR\scloses\s\[\#[0-9]{1,}\]\((https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~\#\?\&\/\=]*)\)` | A regular expression to validate the PR's description convention. Can also provide custom regular expression |
+| `validation-label` | `false` | Ready for Review | A label will be attached on the PR if the PR is valid. Can also provide custom label name |
 
 ## Credits
 
