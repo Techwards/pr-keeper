@@ -102,7 +102,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           description-regex: >
-            This\sPull Request\s[closes|fixes]\s\[\#[0-9]{1,}\]
+            This\sPull Request\s(closes|fixes)\s\[\#[0-9]{1,}\]
 ```
 
 **Example 3:** Using default title and description regular expression and custom label name
