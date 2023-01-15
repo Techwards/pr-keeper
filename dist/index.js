@@ -64,7 +64,6 @@ function run() {
                 const title = pullRequestDetails.data.title;
                 const isPRTitleValid = validatePRField({ field: title, regex: titleRegex });
                 const description = (_a = pullRequestDetails.data.body) !== null && _a !== void 0 ? _a : '';
-                core.info(description);
                 const isPRDescriptionValid = validatePRField({
                     field: description,
                     regex: descriptionRegex

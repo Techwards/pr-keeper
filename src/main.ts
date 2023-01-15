@@ -40,7 +40,6 @@ async function run(): Promise<void> {
       const isPRTitleValid = validatePRField({field: title, regex: titleRegex})
 
       const description = pullRequestDetails.data.body ?? ''
-      core.info(description)
       const isPRDescriptionValid = validatePRField({
         field: description,
         regex: descriptionRegex
