@@ -1,17 +1,17 @@
 <h1 align="center">PR Keeper</h1>
 
 <!-- PROJECT SHIELDS -->
-<!-- <p align="center">
-  <a href="package_link_here">
+<p align="center">
+  <!-- <a href="package_link_here">
     <img src="https://img.shields.io/badge/node-18.x.x-brightgreen.svg" alt="version" />
   </a>
-  &nbsp;
+  &nbsp; -->
   <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
-  &nbsp;
+  <!-- &nbsp;
   <a href="package_link_here">
     <img src="https://img.shields.io/npm/dm/prompts.svg" alt="downloads" />
-  </a>
-</p> -->
+  </a> -->
+</p>
 
 <p align="center">
   A GitHub action to validate Pull Request's title and description consistent convention
