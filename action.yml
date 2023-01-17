@@ -1,11 +1,21 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'PR Keeper'
+description: 'A GitHub action that will validate the pull request'
+on: [pull_request]
 inputs:
-  milliseconds: # change this
+  token:
+    description: 'GitHub secret'
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  title-regex:
+    description: 'Regex for pull request title validation'
+    default: >
+      ^(Feature|Fix|Task)\s\|\sIssue\s\#[1-9]{1,}\s\|\s[\w\s\']*$
+  description-regex:
+    description: 'Regex for pull request description validation'
+    default: >
+      This\sPR\scloses\s\[\#[0-9]{1,}\]\((https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~\#\?\&\/\=]*)\)
+  validation-label:
+    description: 'Label to add when the pull request format is valid'
+    default: Ready for Review
 runs:
   using: 'node16'
   main: 'dist/index.js'

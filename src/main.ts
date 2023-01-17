@@ -1,19 +1,142 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import * as github from '@actions/github'
 
+const token = core.getInput('token')
+const validationLabel = core.getInput('validation-label')
+const titleRegex = core.getInput('title-regex')
+const descriptionRegex = core.getInput('description-regex')
+
+const client = github.getOctokit(token)
+
+type CreateLabelRequest = Parameters<typeof client.rest.issues.createLabel>
+
+type AddLabelRequest = Parameters<typeof client.rest.issues.addLabels>
+
+type GetLabelRequest = Parameters<typeof client.rest.issues.getLabel>
+type GetLabelResponse = ReturnType<typeof client.rest.issues.getLabel>
+
+type RemoveLabelRequest = Parameters<typeof client.rest.issues.removeLabel>
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    const pullRequest = github.context.payload.pull_request
+    if (pullRequest) {
+      const owner = pullRequest.base.user.login
+      const repo = pullRequest.base.repo.name
+      const pullRequestNumber = pullRequest.number
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+      const pullRequestDetails = await client.rest.pulls.get({
+        owner,
+        repo,
+        pull_number: pullRequestNumber
+      })
 
-    core.setOutput('time', new Date().toTimeString())
+      const readyForReviewLabel = await getLabel({
+        owner,
+        repo,
+        name: validationLabel
+      })
+
+      const title = pullRequestDetails.data.title
+      const isPRTitleValid = validatePRField({field: title, regex: titleRegex})
+
+      const description = pullRequestDetails.data.body ?? ''
+      const isPRDescriptionValid = validatePRField({
+        field: description,
+        regex: descriptionRegex
+      })
+
+      !isPRTitleValid &&
+        (await client.rest.issues.createComment({
+          owner,
+          repo,
+          issue_number: pullRequestNumber,
+          body: "This pull request doesn't meet the title convention"
+        }))
+
+      !isPRDescriptionValid &&
+        (await client.rest.issues.createComment({
+          owner,
+          repo,
+          issue_number: pullRequestNumber,
+          body: "This pull request doesn't meet the description convention"
+        }))
+
+      if (!isPRTitleValid || !isPRDescriptionValid) {
+        readyForReviewLabel &&
+          (await removeLabel({
+            owner,
+            repo,
+            issue_number: pullRequestNumber,
+            name: validationLabel
+          }))
+
+        throw new Error('This pull request is invalid')
+      }
+
+      !readyForReviewLabel &&
+        (await createLabel({
+          owner,
+          repo,
+          name: validationLabel,
+          description: 'The pull request is ready to review',
+          color: '00FF00'
+        }))
+
+      await addLabels({
+        repo,
+        owner,
+        issue_number: pullRequestNumber,
+        labels: [validationLabel]
+      })
+    }
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
+    core.setFailed(getErrorMessage(error))
   }
+}
+
+function validatePRField(data: {field: string; regex: string}): boolean {
+  const {field, regex} = data
+  const regExp = new RegExp(regex, 'gm')
+  const isFieldValid = regExp.test(field)
+  return isFieldValid
+}
+
+async function createLabel(...body: CreateLabelRequest): Promise<void> {
+  try {
+    await client.rest.issues.createLabel(...body)
+  } catch (error) {
+    core.info(getErrorMessage(error))
+  }
+}
+async function addLabels(...body: AddLabelRequest): Promise<void> {
+  try {
+    await client.rest.issues.addLabels(...body)
+  } catch (error) {
+    core.info(getErrorMessage(error))
+  }
+}
+
+async function getLabel(
+  ...body: GetLabelRequest
+): Promise<GetLabelResponse | null> {
+  try {
+    return await client.rest.issues.getLabel(...body)
+  } catch (error) {
+    core.info(getErrorMessage(error))
+    return null
+  }
+}
+
+async function removeLabel(...body: RemoveLabelRequest): Promise<void> {
+  try {
+    await client.rest.issues.removeLabel(...body)
+  } catch (error) {
+    core.info(getErrorMessage(error))
+  }
+}
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  return String(error)
 }
 
 run()
